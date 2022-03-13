@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 04eeadcfad76f3f4b89d91ec4e4391f8
+guid: d1c0db32c8c47db49af6561eb36fd5b7
 TrueTypeFontImporter:
   externalObjects: {}
   serializedVersion: 4
@@ -10,8 +10,7 @@ TrueTypeFontImporter:
   includeFontData: 1
   fontNames:
   - Baron Neue
-  fallbackFontReferences:
-  - {fileID: 12800000, guid: 30126a12b7d53ab46ba9df0f58cdd625, type: 3}
+  fallbackFontReferences: []
   customCharacters: 
   fontRenderingMode: 0
   ascentCalculationMode: 1

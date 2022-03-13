@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 5dcc9c428715d0a4ea412b7ce19caea4
+guid: cbc8b1c9a5b65664cbf5a61ffb685e8a
 TrueTypeFontImporter:
   externalObjects: {}
   serializedVersion: 4
@@ -11,11 +11,11 @@ TrueTypeFontImporter:
   fontNames:
   - Baron Neue
   fallbackFontReferences:
-  - {fileID: 12800000, guid: 990f5f713168eb84a98bb3056b15fba8, type: 3}
-  - {fileID: 12800000, guid: 491f6aa6caf136343a5a3ff7869ba4f1, type: 3}
-  - {fileID: 12800000, guid: 04eeadcfad76f3f4b89d91ec4e4391f8, type: 3}
-  - {fileID: 12800000, guid: 30126a12b7d53ab46ba9df0f58cdd625, type: 3}
-  - {fileID: 12800000, guid: f758ddde29808a34dbe1111821f795a0, type: 3}
+  - {fileID: 12800000, guid: 44cc49ab9d7a1634e89d13d628308cc0, type: 3}
+  - {fileID: 12800000, guid: d1c0db32c8c47db49af6561eb36fd5b7, type: 3}
+  - {fileID: 12800000, guid: 07dc20eb7020fea47942ca2e9ebd8996, type: 3}
+  - {fileID: 12800000, guid: 54b7f8da6a4101e40ab46c37e20abe59, type: 3}
+  - {fileID: 12800000, guid: 949305840c6ddd94e93dadf1436cb577, type: 3}
   customCharacters: 
   fontRenderingMode: 0
   ascentCalculationMode: 1
