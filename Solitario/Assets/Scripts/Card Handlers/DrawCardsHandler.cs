@@ -6,6 +6,7 @@ using UnityEngine.EventSystems;
 
 public class DrawCardsHandler : MonoBehaviour, IPointerDownHandler
 {
+    #region Script Parameters
     public GameObject CardUIPrefab;
     public Transform[] CardDeckPositions;
     public List<CardUI> CardUIPile = new List<CardUI>();
@@ -14,26 +15,47 @@ public class DrawCardsHandler : MonoBehaviour, IPointerDownHandler
     public Sprite CardTransparent;
     [SerializeField]
     private Image DeckImage;
+    #endregion
 
-    private List<CardData> _hiddenCards = new List<CardData>();
-
-    private int _pileCounter = 0;
-
+    #region Fields
+    private List<CardData> hiddenCards = new List<CardData>();
+    private int pileCounter = 0;
     private bool canDraw = false;
+    #endregion
 
+    #region Unity Methods
     private void Start()
     {
         InitEvents();
     }
+    #endregion
 
+    #region Unity Events
     public void OnPointerDown(PointerEventData eventData)
     {
         if (!canDraw)
             return;
+        if(GameManager.Instance.DrawMode == DrawMode.One)
+        {
+            DrawCard();
+        }
+        else
+        {
 
-        DrawCard();
+            DrawCard();
+            if(!DeckManager.Instance.IsDeckEmpty())
+            {
+                DrawCard();
+                if(!DeckManager.Instance.IsDeckEmpty())
+                {
+                    DrawCard();
+                }
+            }
+        }
     }
+    #endregion
 
+    #region Implementations
     private void DrawCard()
     {
         CardData drawCardData = DeckManager.Instance.DrawCard();
@@ -44,9 +66,9 @@ public class DrawCardsHandler : MonoBehaviour, IPointerDownHandler
         RefillDrawPile();
 
         CardUI cardToDraw;
-        if (_pileCounter >= 3)
+        if (pileCounter >= 3)
         {
-            cardToDraw = CardUIPile[_pileCounter];
+            cardToDraw = CardUIPile[pileCounter];
             cardToDraw.SetCardData(drawCardData, CardArea.DrawPile);
             cardToDraw.gameObject.SetActive(true);
             cardToDraw.FlipCard(CardSide.Front);
@@ -56,23 +78,22 @@ public class DrawCardsHandler : MonoBehaviour, IPointerDownHandler
         }
         else
         {
-            cardToDraw = CardUIPile[_pileCounter];
+            cardToDraw = CardUIPile[pileCounter];
             cardToDraw.gameObject.SetActive(true);
             cardToDraw.SetCardData(drawCardData, CardArea.DrawPile);
             cardToDraw.FlipCard(CardSide.Front);
-            cardToDraw.SetSortingOrder(_pileCounter + 1);
+            cardToDraw.SetSortingOrder(pileCounter + 1);
             cardToDraw.EnableRaycast(true);
-            iTween.MoveTo(cardToDraw.gameObject, CardDeckPositions[_pileCounter].position, 0.4f);
+            iTween.MoveTo(cardToDraw.gameObject, CardDeckPositions[pileCounter].position, 0.4f);
         }
 
         ShiftToLeft();
     }
-
     private void ShiftToRight() 
     {
         RefillDrawPile();
 
-        if (_hiddenCards.Count > 0)
+        if (hiddenCards.Count > 0)
         {
             CardUI hiddenCard = null;
 
@@ -84,13 +105,20 @@ public class DrawCardsHandler : MonoBehaviour, IPointerDownHandler
                     hiddenCard = card;
             }
 
-            iTween.MoveTo(hiddenCard.gameObject, CardDeckPositions[0].position, 0.1f);
-            hiddenCard.gameObject.SetActive(true);
-            hiddenCard.SetCardData(_hiddenCards[_hiddenCards.Count - 1], CardArea.DrawPile);
-            hiddenCard.FlipCard(CardSide.Front);
-            hiddenCard.SetSortingOrder(1);
-            hiddenCard.EnableRaycast(false);
-            _hiddenCards.Remove(hiddenCard.CurrentCardData);
+            if(hiddenCard != null)
+            {
+                iTween.MoveTo(hiddenCard.gameObject, CardDeckPositions[0].position, 0.1f);
+                hiddenCard.gameObject.SetActive(true);
+                hiddenCard.SetCardData(hiddenCards[hiddenCards.Count - 1], CardArea.DrawPile);
+                hiddenCard.FlipCard(CardSide.Front);
+                hiddenCard.SetSortingOrder(1);
+                hiddenCard.EnableRaycast(false);
+                hiddenCards.Remove(hiddenCard.CurrentCardData);
+            }
+            else
+            {
+                Debug.LogWarning("HiddenCards is Null");
+            }
 
             CardUIPile[0].SetSortingOrder(2);
             CardUIPile[0].EnableRaycast(false);
@@ -107,20 +135,19 @@ public class DrawCardsHandler : MonoBehaviour, IPointerDownHandler
         }
         else
         {
-            _pileCounter--;
+            pileCounter--;
 
-            if(_pileCounter > 0)
+            if(pileCounter > 0)
             {
-                CardUIPile[_pileCounter -1].EnableRaycast(true);
+                CardUIPile[pileCounter -1].EnableRaycast(true);
             }
         }
     }
-
     private void ShiftToLeft()
     {
         RefillDrawPile();
 
-        if (_pileCounter >= 3)
+        if (pileCounter >= 3)
         {
             CardUIPile[1].SetSortingOrder(1);
             CardUIPile[1].EnableRaycast(false);
@@ -135,22 +162,21 @@ public class DrawCardsHandler : MonoBehaviour, IPointerDownHandler
             cardToHide.gameObject.SetActive(false);
             CardUIPile.Remove(cardToHide);
             CardUIPile.Add(cardToHide);
-            _hiddenCards.Add(cardToHide.CurrentCardData);
+            hiddenCards.Add(cardToHide.CurrentCardData);
         }
         else
         {
-            if (_pileCounter > 0)
+            if (pileCounter > 0)
             {
-                CardUIPile[_pileCounter - 1].EnableRaycast(false);   
+                CardUIPile[pileCounter - 1].EnableRaycast(false);   
             }
 
-            _pileCounter++;
+            pileCounter++;
         }
     }
-
     private IEnumerator PutCardOnDeck()
     {
-        CardUI shiftInDeckCard = CardUIPile[_pileCounter];
+        CardUI shiftInDeckCard = CardUIPile[pileCounter];
         shiftInDeckCard.FlipCard(CardSide.Back);
 
         iTween.MoveTo(shiftInDeckCard.gameObject, DrawDeckParent.position, 0.4f);
@@ -159,7 +185,6 @@ public class DrawCardsHandler : MonoBehaviour, IPointerDownHandler
 
         shiftInDeckCard.gameObject.SetActive(false);
     }
-
     private IEnumerator ResetPile(int pileToReset)
     {
         if (CardUIPile[pileToReset].gameObject.activeInHierarchy)
@@ -170,7 +195,6 @@ public class DrawCardsHandler : MonoBehaviour, IPointerDownHandler
             CardUIPile[pileToReset].gameObject.SetActive(false);
         }
     }
-
     private IEnumerator UndoResetPile(int pileToUndo)
     {
         CardUI cardToUndo = CardUIPile[pileToUndo];
@@ -182,7 +206,6 @@ public class DrawCardsHandler : MonoBehaviour, IPointerDownHandler
 
         yield return null;
     }
-
     private void RefillDrawPile()
     {
         // Check if the current pile cards in one less, due to a previous pick command
@@ -197,8 +220,6 @@ public class DrawCardsHandler : MonoBehaviour, IPointerDownHandler
             }
         }
     }
-
-    #region Events Handlers
     private void InitEvents()
     {
         EventsManager.Instance.OnCardsDealed.AddListener(HandleEventCardsDealed);
@@ -209,12 +230,10 @@ public class DrawCardsHandler : MonoBehaviour, IPointerDownHandler
         EventsManager.Instance.OnReset.AddListener(HandleEventReset);
         EventsManager.Instance.OnUndoReset.AddListener(HandleEventUndoReset);
     }
-
     private void HandleEventCardsDealed(List<CardData> cardsData)
     {
         canDraw = true;
     }
-
     private void HandleEventCardMove(CardUI cardui, Transform destinationParent)
     {
         if (!CardUIPile.Contains(cardui))
@@ -223,20 +242,18 @@ public class DrawCardsHandler : MonoBehaviour, IPointerDownHandler
         CardUIPile.Remove(cardui);
         ShiftToRight();
     }
-
     private void HandleEventUndoCardMove(CardUI cardui, Transform sourceParent)
     {
         if (sourceParent.name != DrawDeckParent.name)
             return;
 
         ShiftToLeft();
-        CardUIPile.Insert(_pileCounter - 1, cardui);
-        iTween.MoveTo(cardui.gameObject, CardDeckPositions[_pileCounter-1].position, 0.4f);
+        CardUIPile.Insert(pileCounter - 1, cardui);
+        iTween.MoveTo(cardui.gameObject, CardDeckPositions[pileCounter-1].position, 0.4f);
         cardui.transform.SetParent(DrawDeckParent);
-        cardui.SetSortingOrder(_pileCounter);
+        cardui.SetSortingOrder(pileCounter);
         cardui.SetCardArea(CardArea.DrawPile);
     }
-
     private void HandleEventUndoDraw()
     {
         DeckImage.sprite = CardBack;
@@ -244,30 +261,23 @@ public class DrawCardsHandler : MonoBehaviour, IPointerDownHandler
         ShiftToRight();
         StartCoroutine(PutCardOnDeck());
     }
-
     private void HandleEventDeckEmpty()
     {
         DeckImage.sprite = CardTransparent;
     }
-
     private void HandleEventReset()
     {
-        //Debug.Log("HandleEventReset");
-
         DeckImage.sprite = CardBack;
 
         StartCoroutine(ResetPile(0));
         StartCoroutine(ResetPile(1));
         StartCoroutine(ResetPile(2));
 
-        _hiddenCards.Clear();
-        _pileCounter = 0;
+        hiddenCards.Clear();
+        pileCounter = 0;
     }
-
     private void HandleEventUndoReset()
     {
-        //Debug.Log("HandleEventUndoReset");
-
         DeckImage.sprite = CardTransparent;
 
         StartCoroutine(UndoResetPile(0));
@@ -286,10 +296,10 @@ public class DrawCardsHandler : MonoBehaviour, IPointerDownHandler
         for (int i = 0; i < DeckManager.Instance.DrawnCards.Count - 3; i++)
         {
             CardData drawCard = DeckManager.Instance.DrawnCards[i];
-            _hiddenCards.Add(drawCard);
+            hiddenCards.Add(drawCard);
         }
 
-        _pileCounter = totalCardsActive;
+        pileCounter = totalCardsActive;
     }
     #endregion
 }

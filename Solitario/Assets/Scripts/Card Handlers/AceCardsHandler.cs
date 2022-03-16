@@ -1,61 +1,59 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class AceCardsHandler : MonoBehaviour
 {
-    [SerializeField]
-    private Transform[] _acePilesTransform = null;
+    #region Script Parameters
+    public Transform[] AcePilesTransform = null;
+    public Transform LandscapeParent = null;
+    public Transform PortraitParent = null;
+    #endregion
 
-    [SerializeField]
-    private Transform _landscapeParent = null;
-    [SerializeField]
-    private Transform _portraitParent = null;
-
+    #region Unity Methods
     private void Start()
     {
         InitEvents();
     }
+    #endregion
 
-    #region Events Handlers
+    #region Implementations
     private void InitEvents()
     {
-        EventsManager.Instance.OnOrientationChanged.AddListener(HandleEventDeviceOrientationChange);
+        EventsManager.Instance.OnOrientationChanged.AddListener(HandleEventScreenOrientationChange);
     }
 
-    private void HandleEventDeviceOrientationChange(DeviceOrientation deviceOrientation)
+    private void HandleEventScreenOrientationChange(ScreenOrientation ScreenOrientation)
     {
-        switch (deviceOrientation)
+        switch (ScreenOrientation)
         {
-            case DeviceOrientation.Portrait:
-                for (int i = 0; i < _acePilesTransform.Length; i++)
+            case ScreenOrientation.Portrait:
+                for (int i = 0; i < AcePilesTransform.Length; i++)
                 {
-                    Transform tablePileTransform = _acePilesTransform[i];
-                    tablePileTransform.SetParent(_portraitParent);
+                    Transform tablePileTransform = AcePilesTransform[i];
+                    tablePileTransform.SetParent(PortraitParent);
                 }
                 break;
 
-            case DeviceOrientation.PortraitUpsideDown:
-                for (int i = 0; i < _acePilesTransform.Length; i++)
+            case ScreenOrientation.PortraitUpsideDown:
+                for (int i = 0; i < AcePilesTransform.Length; i++)
                 {
-                    Transform tablePileTransform = _acePilesTransform[i];
-                    tablePileTransform.SetParent(_portraitParent);
+                    Transform tablePileTransform = AcePilesTransform[i];
+                    tablePileTransform.SetParent(PortraitParent);
                 }
                 break;
 
-            case DeviceOrientation.LandscapeLeft:
-                for (int i = 0; i < _acePilesTransform.Length; i++)
+            case ScreenOrientation.LandscapeLeft:
+                for (int i = 0; i < AcePilesTransform.Length; i++)
                 {
-                    Transform tablePileTransform = _acePilesTransform[i];
-                    tablePileTransform.SetParent(_landscapeParent);
+                    Transform tablePileTransform = AcePilesTransform[i];
+                    tablePileTransform.SetParent(LandscapeParent);
                 }
                 break;
 
-            case DeviceOrientation.LandscapeRight:
-                for (int i = 0; i < _acePilesTransform.Length; i++)
+            case ScreenOrientation.LandscapeRight:
+                for (int i = 0; i < AcePilesTransform.Length; i++)
                 {
-                    Transform tablePileTransform = _acePilesTransform[i];
-                    tablePileTransform.SetParent(_landscapeParent);
+                    Transform tablePileTransform = AcePilesTransform[i];
+                    tablePileTransform.SetParent(LandscapeParent);
                 }
                 break;
         }

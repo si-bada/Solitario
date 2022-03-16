@@ -136,24 +136,24 @@ public class DeckManager : MonoBehaviour
     {
         deckCards = cardsData;
     }
-    private void HandleEventCardMove(CardUI guiCard, Transform destinationParent)
+    private void HandleEventCardMove(CardUI cardui, Transform destinationParent)
     {
         // Check if the moved card was in the drawn cards pile
-        if (drawnCards.Contains(guiCard.CurrentCardData))
+        if (drawnCards.Contains(cardui.CurrentCardData))
         {
             // Call the Pick Command to save the card drawn pile index
-            ICommand pickCommand = new PickCommand(guiCard, drawnCards.IndexOf(guiCard.CurrentCardData));
+            ICommand pickCommand = new PickCommand(cardui, drawnCards.IndexOf(cardui.CurrentCardData));
             GameManager.Instance.CommandSystem.AddCommand(pickCommand);
             pickCommand.Execute();
         }
     }
-    private void HandleEventPick(CardUI guiCard)
+    private void HandleEventPick(CardUI cardui)
     {
-        drawnCards.Remove(guiCard.CurrentCardData);
+        drawnCards.Remove(cardui.CurrentCardData);
     }
-    private void HandleEventUndoPick(CardUI guiCard, int drawnCardIndex)
+    private void HandleEventUndoPick(CardUI cardui, int drawnCardIndex)
     {
-        drawnCards.Insert(drawnCardIndex, guiCard.CurrentCardData);
+        drawnCards.Insert(drawnCardIndex, cardui.CurrentCardData);
     }
     private void HandleEventUndoDraw()
     {

@@ -5,10 +5,7 @@ using UnityEngine.EventSystems;
 
 public class PileHandler : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
-    #region Public Variables References
-    /// <summary>
-    /// The list of this pile children Cards
-    /// </summary>
+    #region Getters
     public List<CardUI> Cards
     {
         get
@@ -16,64 +13,65 @@ public class PileHandler : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
             return cards;
         }
     }
-
-    /// <summary>
-    /// The table area where this pile was set
-    /// </summary>
     public CardArea CardArea
     {
         get
         {
-            return _cardArea;
+            return cardArea;
         }
     }
-
-    /// <summary>
-    /// In case of AcePile, set the suit of the pile
-    /// </summary>
-    public CardSymbol CardSuit
+    public CardSymbol PileSymbol
     {
         get
         {
-            return _cardSuit;
+            return cardSymbol;
+        }
+    }
+    public Transform StackPoint
+    {
+        get
+        {
+            return overrideParent;
         }
     }
     #endregion
 
-    #region Privave Variables References
+    #region Script Parameters
 
     [SerializeField]
     private List<CardUI> cards = new List<CardUI>();
 
     [SerializeField]
-    private CardArea _cardArea = CardArea.Table;
+    private CardArea cardArea = CardArea.Table;
 
     [SerializeField, Header("If this is a Ace pile")]
-    private CardSymbol _cardSuit = CardSymbol.Empty;
+    private CardSymbol cardSymbol = CardSymbol.Empty;
 
-    /// <summary>
-    /// Set a parent reference for the Cards list. if null, the parent will be this object.
-    /// </summary>
     [SerializeField]
-    private Transform _overrideParent = null;
+    private Transform overrideParent = null;
     #endregion
 
+    #region Unity Methods
     private void Start()
     {
         InitEvents();
+        if (overrideParent == null)
+            overrideParent = transform;
+    }
+    #endregion
 
-        if (_overrideParent == null)
-            _overrideParent = transform;
+    #region Implmentations
+    private void InitEvents()
+    {
+        EventsManager.Instance.OnCardsDealed.AddListener(HandleEventCardsDealed);
+        EventsManager.Instance.OnCardDragging.AddListener(HandleEventCardDragging);
+        EventsManager.Instance.OnCardMove.AddListener(HandleEventCardMove);
+        EventsManager.Instance.OnUndoCardMove.AddListener(HandleEventUndoCardMove);
     }
 
-    /// <summary>
-    /// After all the cards are dealed, save any child Card reference in Cards list
-    /// </summary>
-    /// <returns></returns>
     private IEnumerator FillCardTable()
     {
-        yield return new WaitForSeconds(0.12f);
-        Debug.LogWarning("filling card table");
+        yield return new WaitForSeconds(0.15f);
         CardUI[] carduiArray = transform.GetComponentsInChildren<CardUI>();
 
         for (int i = 0; i < carduiArray.Length; i++)
@@ -83,19 +81,14 @@ public class PileHandler : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
         }
     }
 
-    /// <summary>
-    /// After any UndoCommand, check the right action to do with the first card of the list
-    /// </summary>
-    /// <param name="undoCard"></param>
-    /// <param name="columnAction"></param>
-    private void CheckUndoCommand(CardData undoCard, OperationType columnAction)
+    private void CheckUndoCommand(CardData undoCard, OperationType action)
     {
         if (cards.Count <= 0)
             return;
 
         CardUI firstCard = cards[cards.Count - 1];
 
-        switch (columnAction)
+        switch (action)
         {
             case OperationType.Add:
 
@@ -127,50 +120,11 @@ public class PileHandler : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
         }
     }
 
-    #region Event System Handlers
-    /// <summary>
-    /// Call the pointer enter event when this pile is empty
-    /// </summary>
-    /// <param name="eventData"></param>
-    public void OnPointerEnter(PointerEventData eventData)
-    {
-        if(cards.Count <= 0)
-        {
-            EventsManager.Instance.OnPilePointerEnter.Invoke(this);
-        }
-    }
-
-    /// <summary>
-    /// Call the pointer exit event when this pile is empty
-    /// </summary>
-    /// <param name="eventData"></param>
-    public void OnPointerExit(PointerEventData eventData)
-    {
-        if (cards.Count <= 0)
-        {
-            EventsManager.Instance.OnPilePointerExit.Invoke();
-        }
-    }
-    #endregion
-
-    #region Events Handlers
-    private void InitEvents()
-    {
-        EventsManager.Instance.OnCardsDealed.AddListener(HandleEventCardsDealed);
-        EventsManager.Instance.OnCardDragging.AddListener(HandleEventCardDragging);
-        EventsManager.Instance.OnCardMove.AddListener(HandleEventCardMove);
-        EventsManager.Instance.OnUndoCardMove.AddListener(HandleEventUndoCardMove);
-    }
-
     private void HandleEventCardsDealed(List<CardData> cardsData)
     {
         StartCoroutine(FillCardTable());
     }
 
-    /// <summary>
-    /// When the player started to drag a card in top of a stacked pile, append cards and set their UI sorting order
-    /// </summary>
-    /// <param name="cardui"></param>
     private void HandleEventCardDragging(CardUI cardui)
     {
         if (!cards.Contains(cardui))
@@ -191,12 +145,6 @@ public class PileHandler : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
             cardui.AppendDraggingCards(hangingCard);
         }
     }
-
-    /// <summary>
-    /// Handle the MoveCommand called event
-    /// </summary>
-    /// <param name="cardui"></param>
-    /// <param name="destinationParent"></param>
     private void HandleEventCardMove(CardUI cardui, Transform destinationParent)
     {
         // If the moved card reference was saved in the Cards list, remove it 
@@ -221,10 +169,10 @@ public class PileHandler : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
             if (destinationParent.GetComponent<PileHandler>() == this || destinationParent.GetComponentInParent<PileHandler>() == this)
             {
                 cards.Add(cardui);
-                cardui.transform.SetParent(_overrideParent);
+                cardui.transform.SetParent(overrideParent);
 
                 // Set the Card CardArea as this Pile Card Area
-                cardui.SetCardArea(_cardArea);
+                cardui.SetCardArea(cardArea);
 
                 // If this pile is one of the AcePile, add one unit of the CompletedAcePileCount to detect the win conditoin
                 if(CardArea == CardArea.AcesPile)
@@ -262,9 +210,27 @@ public class PileHandler : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
             CheckUndoCommand(cardui.CurrentCardData, OperationType.Add);
 
             cards.Add(cardui);
-            cardui.transform.SetParent(_overrideParent);
+            cardui.transform.SetParent(overrideParent);
 
-            cardui.SetCardArea(_cardArea);
+            cardui.SetCardArea(cardArea);
+        }
+    }
+    #endregion
+
+    #region Event System Handlers
+    public void OnPointerEnter(PointerEventData eventData)
+    {
+        if (cards.Count <= 0)
+        {
+            EventsManager.Instance.OnPilePointerEnter.Invoke(this);
+        }
+    }
+
+    public void OnPointerExit(PointerEventData eventData)
+    {
+        if (cards.Count <= 0)
+        {
+            EventsManager.Instance.OnPilePointerExit.Invoke();
         }
     }
     #endregion

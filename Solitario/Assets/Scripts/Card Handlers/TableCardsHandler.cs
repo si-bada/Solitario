@@ -4,22 +4,22 @@ using UnityEngine;
 
 public class TableCardsHandler : MonoBehaviour
 {
+    #region Sciprt Parameters
     public CardUI CardUIPrefab;
-
     public Transform DeckTransform;
+    public Transform[] TablePilesTransform;
+    public Transform LandscapeParent;
+    public Transform PortraitParent;
+    #endregion
 
-    public Transform[] _tablePilesTransform;
-
-    public Transform _landscapeParent;
-
-    /// The parent where to move any card object when the device is in portrait orientation
-    public Transform _portraitParent;
-
+    #region Unity Methods
     private void Start()
     {
         InitEvents(); 
     }
+    #endregion
 
+    #region Implementations
     private void InitCardsUI(List<CardData> cardsData)
     {
         StartCoroutine(SpawnCards(cardsData));
@@ -40,7 +40,7 @@ public class TableCardsHandler : MonoBehaviour
                 CardUI cardui = Instantiate(CardUIPrefab, DeckTransform);
 
                 // Save the column transform reference inside each Card script
-                Transform columnTransform = _tablePilesTransform[currentRow];
+                Transform columnTransform = TablePilesTransform[currentRow];
                 cardui.UpdateParent(columnTransform);
 
                 GameObject spawnPosition = Instantiate(new GameObject("spawnPos", typeof(RectTransform)), columnTransform);
@@ -63,7 +63,7 @@ public class TableCardsHandler : MonoBehaviour
                 yield return new WaitForSeconds(0.01f);
                 cardui.transform.SetParent(spawnPosition.transform);
 
-                AudioManager.Instance.PlayOneShot("SpawnCard");
+                AudioManager.Instance.PlayOneShot("SpawnCard_SFX");
 
                 // Time to wait to next card to spawn
                 yield return new WaitForSeconds(0.1f);
@@ -75,11 +75,10 @@ public class TableCardsHandler : MonoBehaviour
         EventsManager.Instance.OnCardsDealed.Invoke(cardsData);
     }
 
-    #region Events Handlers
     private void InitEvents()
     {
         EventsManager.Instance.OnShuffleEnded.AddListener(HandleEventShuffleEnded);
-        EventsManager.Instance.OnOrientationChanged.AddListener(HandleEventDeviceOrientationChange);
+        EventsManager.Instance.OnOrientationChanged.AddListener(HandleEventScreenOrientationChange);
     }
 
     private void HandleEventShuffleEnded(List<CardData> cardsData)
@@ -87,39 +86,39 @@ public class TableCardsHandler : MonoBehaviour
         InitCardsUI(cardsData);
     }
 
-    private void HandleEventDeviceOrientationChange(DeviceOrientation deviceOrientation)
+    private void HandleEventScreenOrientationChange(ScreenOrientation ScreenOrientation)
     {
-        switch (deviceOrientation)
+        switch (ScreenOrientation)
         {
-            case DeviceOrientation.Portrait:
-                for (int i = 0; i < _tablePilesTransform.Length; i++)
+            case ScreenOrientation.Portrait:
+                for (int i = 0; i < TablePilesTransform.Length; i++)
                 {
-                    Transform tablePileTransform = _tablePilesTransform[i];
-                    tablePileTransform.SetParent(_portraitParent);
+                    Transform tablePileTransform = TablePilesTransform[i];
+                    tablePileTransform.SetParent(PortraitParent);
                 }
                 break;
 
-            case DeviceOrientation.PortraitUpsideDown:
-                for (int i = 0; i < _tablePilesTransform.Length; i++)
+            case ScreenOrientation.PortraitUpsideDown:
+                for (int i = 0; i < TablePilesTransform.Length; i++)
                 {
-                    Transform tablePileTransform = _tablePilesTransform[i];
-                    tablePileTransform.SetParent(_portraitParent);
+                    Transform tablePileTransform = TablePilesTransform[i];
+                    tablePileTransform.SetParent(PortraitParent);
                 }
                 break;
 
-            case DeviceOrientation.LandscapeLeft:
-                for (int i = 0; i < _tablePilesTransform.Length; i++)
+            case ScreenOrientation.LandscapeLeft:
+                for (int i = 0; i < TablePilesTransform.Length; i++)
                 {
-                    Transform tablePileTransform = _tablePilesTransform[i];
-                    tablePileTransform.SetParent(_landscapeParent);
+                    Transform tablePileTransform = TablePilesTransform[i];
+                    tablePileTransform.SetParent(LandscapeParent);
                 }
                 break;
 
-            case DeviceOrientation.LandscapeRight:
-                for (int i = 0; i < _tablePilesTransform.Length; i++)
+            case ScreenOrientation.LandscapeRight:
+                for (int i = 0; i < TablePilesTransform.Length; i++)
                 {
-                    Transform tablePileTransform = _tablePilesTransform[i];
-                    tablePileTransform.SetParent(_landscapeParent);
+                    Transform tablePileTransform = TablePilesTransform[i];
+                    tablePileTransform.SetParent(LandscapeParent);
                 }
                 break;
         }

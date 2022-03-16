@@ -5,7 +5,7 @@ using UnityEngine.UI;
 using TMPro;
 using UnityEngine.EventSystems;
 
-public class CardUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler, IPointerEnterHandler, IPointerExitHandler
+public class CardUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler, IPointerEnterHandler, IPointerExitHandler, IPointerDownHandler
 {
     #region Getters
     public CardData CurrentCardData
@@ -74,6 +74,9 @@ public class CardUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHa
     private Canvas canvas = null;
     private bool beginDragOverrideSorting = false;
     private int beginDragSortingOrder = 0;
+    private float clicked = 0;
+    private float clicktime = 0;
+    private float clickdelay = 0.5f;
     #endregion
 
     #region Unity Methods
@@ -189,8 +192,6 @@ public class CardUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHa
     }
     public bool IsLastFrontCardInPile(int cardsPileCount)
     {
-        Debug.Log(cardsPileCount);
-        Debug.Log("IsLastFrontCardInPile");
         PileHandler pileHandler = GetComponentInParent<PileHandler>();
 
         if (pileHandler == null || pileHandler.CardArea != CardArea.Table)
@@ -202,11 +203,7 @@ public class CardUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHa
         if (pileHandler.Cards.Count == cardsPileCount)
             return false;
 
-        Debug.Log("PileHandler:" + pileHandler.Cards.Count);
-
         CardUI previousCardInPile = pileHandler.Cards[pileHandler.Cards.IndexOf(this) - 1];
-
-        Debug.Log("previousCardInPile:" + previousCardInPile.CurrentCardData.Rank);
 
         if (previousCardInPile == null)
             return false;
@@ -223,6 +220,8 @@ public class CardUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHa
     #region Unity Events
     public void OnDrag(PointerEventData eventData)
     {
+        if (GameManager.Instance.GameState == GameState.Pause || GameManager.Instance.GameState == GameState.Home)
+            return;
         if (currentSide == CardSide.Back)
             return;
 
@@ -232,6 +231,8 @@ public class CardUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHa
 
     public void OnBeginDrag(PointerEventData eventData)
     {
+        if (GameManager.Instance.GameState == GameState.Pause || GameManager.Instance.GameState == GameState.Home)
+            return;
         if (currentSide == CardSide.Back)
             return;
 
@@ -253,15 +254,18 @@ public class CardUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHa
 
     public void OnEndDrag(PointerEventData eventData)
     {
+        if (GameManager.Instance.GameState == GameState.Pause || GameManager.Instance.GameState == GameState.Home)
+            return;
         if (currentSide == CardSide.Back)
             return;
 
-        Debug.Log("OnEndDrag: " + CurrentCardData.Rank + " of " + CurrentCardData.Symbol);
         EventsManager.Instance.OnCardDropped.Invoke();
     }
 
     public void OnPointerEnter(PointerEventData eventData)
     {
+        if (GameManager.Instance.GameState == GameState.Pause || GameManager.Instance.GameState == GameState.Home)
+            return;
         if (currentSide == CardSide.Back)
             return;
 
@@ -270,6 +274,8 @@ public class CardUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHa
 
     public void OnPointerExit(PointerEventData eventData)
     {
+        if (GameManager.Instance.GameState == GameState.Pause || GameManager.Instance.GameState == GameState.Home)
+            return;
         if (currentSide == CardSide.Back)
             return;
 
@@ -372,10 +378,9 @@ public class CardUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHa
         transform.parent.gameObject.SetActive(false);
         transform.SetParent(currentParent);
     }
-    private void HandleCardMove(CardUI guiCard, Transform destinationParent)
+    private void HandleCardMove(CardUI cardui, Transform destinationParent)
     {
-        // Check if the the card moved is this
-        if (guiCard != this)
+        if (cardui != this)
             return;
 
         if (cardChildList.Count > 0)
@@ -392,9 +397,9 @@ public class CardUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHa
         canvasGroup.blocksRaycasts = true;
         isBeingDragged = false;
     }
-    private void HandleCardFailMove(CardUI guiCard)
+    private void HandleCardFailMove(CardUI cardui)
     {
-        if (guiCard != this)
+        if (cardui != this)
             return;
 
         MoveToEndDragPosition();
@@ -414,6 +419,27 @@ public class CardUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHa
         canvas.sortingOrder = beginDragSortingOrder;
         canvasGroup.blocksRaycasts = true;
         isBeingDragged = false;
+    }
+    public void OnPointerDown(PointerEventData data)
+    {
+        if (GameManager.Instance.GameState == GameState.Pause || GameManager.Instance.GameState == GameState.Home)
+            return;
+        clicked++;
+        if (clicked == 1)
+        {
+            clicktime = Time.time;
+        }
+        if (clicked > 1 && Time.time - clicktime < clickdelay)
+        {
+            clicked = 0;
+            clicktime = 0;
+            EventsManager.Instance.OnCardDoubleClick.Invoke(this);
+        }
+        else if (clicked > 2 || Time.time - clicktime > 1)
+        {
+            clicked = 1;
+            clicktime = Time.time;
+        }
     }
     #endregion
 

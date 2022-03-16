@@ -1,15 +1,14 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
 public class EventsManager : MonoBehaviour
 {
-    /// <summary>
-    /// Singleton instance reference
-    /// </summary>
+    #region Static
     public static EventsManager Instance;
+    #endregion
 
+    #region Events
     public Events.EventGameStateChanged OnGameStateChanged;
     public Events.EventOrientationChanged OnOrientationChanged;
     public Events.EventShuffleEnded OnShuffleEnded;
@@ -22,6 +21,7 @@ public class EventsManager : MonoBehaviour
     public Events.EventCardMove OnCardMove;
     public Events.EventUndoCardMove OnUndoCardMove;
     public Events.EventCardDragging OnCardDragging;
+    public Events.EventCardDoubleClick OnCardDoubleClick;
     public Events.EventCardFailMove OnCardFailMove;
     public Events.EventPick OnPick;
     public Events.EventUndoPick OnUndoPick;
@@ -33,7 +33,9 @@ public class EventsManager : MonoBehaviour
     public Events.EventUndoScore OnUndoScore;
     public Events.EventCommand OnCommand;
     public Events.EventGameWon OnGameWon;
+    #endregion
 
+    #region Unity Methods
     private void Awake()
     {
         if (Instance == null)
@@ -50,15 +52,17 @@ public class EventsManager : MonoBehaviour
     {
         DontDestroyOnLoad(this);
     }
+    #endregion
 }
 
 public class Events
 {
     [System.Serializable] public class EventGameStateChanged : UnityEvent<GameState> { };
-    [System.Serializable] public class EventOrientationChanged : UnityEvent<DeviceOrientation> { };
+    [System.Serializable] public class EventOrientationChanged : UnityEvent<ScreenOrientation> { };
     [System.Serializable] public class EventShuffleEnded : UnityEvent<List<CardData>> { };
     [System.Serializable] public class EventCardsDealed : UnityEvent<List<CardData>> { };
     [System.Serializable] public class EventCardDragging : UnityEvent<CardUI> { };
+    [System.Serializable] public class EventCardDoubleClick : UnityEvent<CardUI> { };
     [System.Serializable] public class EventCardDropped : UnityEvent { };
     [System.Serializable] public class EventCardPointerEnter : UnityEvent<CardUI> { };
     [System.Serializable] public class EventCardPointerExit : UnityEvent { };

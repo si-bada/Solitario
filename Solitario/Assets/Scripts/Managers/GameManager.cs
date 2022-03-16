@@ -21,7 +21,18 @@ public class GameManager : MonoBehaviour
             return currentGameState;
         }
     }
-    public DeviceOrientation CurrentDeviceOrientation
+    public DrawMode DrawMode
+    {
+        get
+        {
+            return currentDrawMode;
+        }
+        set
+        {
+            currentDrawMode = value;
+        }
+    }
+    public ScreenOrientation CurrentDeviceOrientation
     {
         get
         {
@@ -45,8 +56,9 @@ public class GameManager : MonoBehaviour
     #endregion
 
     #region Fields
-    private GameState currentGameState = GameState.Started;
-    private DeviceOrientation currentDeviceOrientation;
+    private GameState currentGameState = GameState.Home;
+    private DrawMode currentDrawMode = DrawMode.One;
+    private ScreenOrientation currentDeviceOrientation;
     private int completedAcePileCount = 0;
     private MoveSystem moveSystem;
     private CommandSystem commandSystem;
@@ -60,6 +72,8 @@ public class GameManager : MonoBehaviour
             Destroy(gameObject);
         }
         Instance = this;
+        currentDeviceOrientation = Screen.orientation;
+
     }
     private void Start()
     {
@@ -68,20 +82,18 @@ public class GameManager : MonoBehaviour
         HandleUnityLog();
         InitSystems();
 
-        StartCoroutine(StartingCheckForDeviceOrientationChange());
-
-        SceneManager.sceneLoaded += OnSceneLoaded;
+        StartCoroutine(CheckForDeviceOrientationChange(0.5f));
     }
     private void Update()
     {
         // Editor debug inputs
         if (Input.GetKeyDown(KeyCode.L))
         {
-            EventsManager.Instance.OnOrientationChanged.Invoke(DeviceOrientation.LandscapeRight);
+            EventsManager.Instance.OnOrientationChanged.Invoke(ScreenOrientation.LandscapeRight);
         }
         if (Input.GetKeyDown(KeyCode.P))
         {
-            EventsManager.Instance.OnOrientationChanged.Invoke(DeviceOrientation.Portrait);
+            EventsManager.Instance.OnOrientationChanged.Invoke(ScreenOrientation.Portrait);
         }
         if (Input.GetKeyDown(KeyCode.A))
         {
@@ -120,12 +132,12 @@ public class GameManager : MonoBehaviour
     }
     public void OnHomeSceneButton()
     {
-        AudioManager.Instance.Play("Click");
+        AudioManager.Instance.Play("Click_SFX");
         SceneManager.LoadScene(Scene.Home.ToString());
     }
     public void OnGameSceneButton()
     {
-        AudioManager.Instance.Play("Click");
+        AudioManager.Instance.Play("Click_SFX");
         SceneManager.LoadScene(Scene.Game.ToString());
     }
     public void UpdateGameState(GameState gameState)
@@ -134,6 +146,7 @@ public class GameManager : MonoBehaviour
 
         currentGameState = gameState;
     }
+
     #endregion
 
     #region Implementations
@@ -147,34 +160,32 @@ public class GameManager : MonoBehaviour
     {
         yield return new WaitForSeconds(delay);
 
-        currentDeviceOrientation = Input.deviceOrientation;
+        currentDeviceOrientation = Screen.orientation;
 
         while (keepChecking)
         {
             // Check for an Orientation Change
-            if (currentDeviceOrientation != Input.deviceOrientation)
+            if (currentDeviceOrientation != Screen.orientation)
             {
-                currentDeviceOrientation = Input.deviceOrientation;
+                currentDeviceOrientation = Screen.orientation;
                 EventsManager.Instance.OnOrientationChanged.Invoke(currentDeviceOrientation);
+                if (HomeManager.Instance != null)
+                {
+                    HomeManager.Instance.StartUI();
+                }
             }
 
             yield return new WaitForSeconds(deviceOrientationCheckDelay);
         }
     }
-    private IEnumerator StartingCheckForDeviceOrientationChange()
-    {
-        yield return new WaitForSeconds(0.1f);
-
-        currentDeviceOrientation = Input.deviceOrientation;
-        EventsManager.Instance.OnOrientationChanged.Invoke(currentDeviceOrientation);
-    }
+    //editor logs
     private void HandleUnityLog()
     {
-#if UNITY_EDITOR
-        Debug.unityLogger.logEnabled = true;
-#else
-        Debug.unityLogger.logEnabled = false;
-#endif
+//#if UNITY_EDITOR
+//        Debug.unityLogger.logEnabled = true;
+//#else
+//        Debug.unityLogger.logEnabled = false;
+//#endif
     }
     private void OnSceneLoaded(UnityEngine.SceneManagement.Scene scene, LoadSceneMode loadSceneMode)
     {

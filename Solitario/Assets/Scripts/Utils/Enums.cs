@@ -39,6 +39,11 @@ public enum OperationType
     Add,
     Remove
 }
+public enum DrawMode
+{
+    One,
+    Three
+}
 
 public enum WindowUI
 {

@@ -1,41 +1,42 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class UIWindow : MonoBehaviour
 {
+    #region Script Parameters
     public WindowUI window = WindowUI.Nothing;
-
     public GameObject LandscapeMainPanel = null;
     public GameObject PortraitMainPanel = null;
+    public Settings PortraitSettings;
+    #endregion
 
-    public virtual void Start()
+    #region Unity Methods
+    public void Start()
     {
-        EventsManager.Instance.OnOrientationChanged.AddListener((DeviceOrientation) =>
+        EventsManager.Instance.OnOrientationChanged.AddListener((ScreenOrientation) =>
         {
             if (LandscapeMainPanel.activeSelf || PortraitMainPanel.activeSelf)
             {
                 switch (GameManager.Instance.CurrentDeviceOrientation)
                 {
-                    case DeviceOrientation.Portrait:
+                    case ScreenOrientation.Portrait:
 
                         LandscapeMainPanel.SetActive(false);
                         PortraitMainPanel.SetActive(true);
                         break;
 
-                    case DeviceOrientation.PortraitUpsideDown:
+                    case ScreenOrientation.PortraitUpsideDown:
 
                         LandscapeMainPanel.SetActive(false);
                         PortraitMainPanel.SetActive(true);
                         break;
 
-                    case DeviceOrientation.LandscapeLeft:
+                    case ScreenOrientation.LandscapeLeft:
 
                         PortraitMainPanel.SetActive(false);
                         LandscapeMainPanel.SetActive(true);
                         break;
 
-                    case DeviceOrientation.LandscapeRight:
+                    case ScreenOrientation.LandscapeRight:
 
                         PortraitMainPanel.SetActive(false);
                         LandscapeMainPanel.SetActive(true);
@@ -43,28 +44,34 @@ public class UIWindow : MonoBehaviour
                 }
             }         
         });
+        if(PortraitSettings != null)
+        {
+            PortraitSettings.InitSettings();
+        }
     }
+    #endregion
+    #region Methods
 
-    public virtual void OpenWindow()
+    public void OpenWindow()
     {
         switch (GameManager.Instance.CurrentDeviceOrientation)
         {
-            case DeviceOrientation.Portrait:
+            case ScreenOrientation.Portrait:
 
                 PortraitMainPanel.SetActive(true);
                 break;
 
-            case DeviceOrientation.PortraitUpsideDown:
+            case ScreenOrientation.PortraitUpsideDown:
 
                 PortraitMainPanel.SetActive(true);
                 break;
 
-            case DeviceOrientation.LandscapeLeft:
+            case ScreenOrientation.LandscapeLeft:
 
                 LandscapeMainPanel.SetActive(true);
                 break;
 
-            case DeviceOrientation.LandscapeRight:
+            case ScreenOrientation.LandscapeRight:
 
                 LandscapeMainPanel.SetActive(true);
                 break;
@@ -76,7 +83,7 @@ public class UIWindow : MonoBehaviour
         }
     }
 
-    public virtual void OnCloseWindowButton()
+    public void OnCloseWindowButton()
     {
         switch (window)
         {
@@ -85,8 +92,19 @@ public class UIWindow : MonoBehaviour
                 break;
         }
 
-        AudioManager.Instance.Play("Click");
+        AudioManager.Instance.Play("Click_SFX");
         LandscapeMainPanel.SetActive(false);
         PortraitMainPanel.SetActive(false);
     }
+
+    public void OnClickBackToMenu()
+    {
+        GameManager.Instance.OnHomeSceneButton();
+    }
+
+    public void OnClickQuitGame()
+    {
+        Application.Quit();
+    }
+    #endregion
 }
