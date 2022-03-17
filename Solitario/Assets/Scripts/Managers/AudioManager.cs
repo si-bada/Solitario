@@ -19,19 +19,24 @@ public class AudioManager : MonoBehaviour
     #region Unity Methods
     private void Awake()
     {
-        if (Instance == null) { Instance = this; }
-        else Destroy(this);
-
-        DontDestroyOnLoad(gameObject);
-
-        foreach (Sound s in Sounds)
+        if (Instance == null)
         {
-            s.Source = gameObject.AddComponent<AudioSource>();
-            s.Source.clip = s.Clip;
-            s.Source.loop = s.Loop;
-            s.Source.playOnAwake = s.PlayOnAwake;
-            s.Source.volume = s.Volume;
-            s.Source.pitch = s.Pitch;
+            Instance = this;
+
+            foreach (Sound s in Sounds)
+            {
+                s.Source = gameObject.AddComponent<AudioSource>();
+                s.Source.clip = s.Clip;
+                s.Source.loop = s.Loop;
+                s.Source.playOnAwake = s.PlayOnAwake;
+                s.Source.volume = s.Volume;
+                s.Source.pitch = s.Pitch;
+            }
+            DontDestroyOnLoad(gameObject);
+        }
+        else
+        {
+            Destroy(this.gameObject);
         }
     }
 
@@ -89,13 +94,16 @@ public class AudioManager : MonoBehaviour
         {
             if (Sounds[i].Name.Contains("SFX"))
             {
-                if (v == false)
+                if (Sounds[i].Source != null)
                 {
-                    Sounds[i].Source.volume = 0;
-                }
-                else
-                {
-                    Sounds[i].Source.volume = audioVolumes[i];
+                    if (v == false)
+                    {
+                        Sounds[i].Source.volume = 0;
+                    }
+                    else
+                    {
+                        Sounds[i].Source.volume = audioVolumes[i];
+                    }
                 }
             }
         }
@@ -108,13 +116,16 @@ public class AudioManager : MonoBehaviour
         {
             if (!Sounds[i].Name.Contains("SFX"))
             {
-                if(v == false)
+                if(Sounds[i].Source != null)
                 {
-                    Sounds[i].Source.volume = 0;
-                }
-                else
-                {
-                    Sounds[i].Source.volume = audioVolumes[i];
+                    if (v == false)
+                    {
+                        Sounds[i].Source.volume = 0;
+                    }
+                    else
+                    {
+                        Sounds[i].Source.volume = audioVolumes[i];
+                    }
                 }
             }
         }

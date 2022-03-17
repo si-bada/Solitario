@@ -22,8 +22,11 @@ public class Settings : MonoBehaviour
     #region Methods
     public void InitSettings()
     {
-        Music.onValueChanged.AddListener((value) => AudioManager.Instance.MuteMusic(value));
-        SFX.onValueChanged.AddListener((value) => AudioManager.Instance.MuteSFX(value));
+        if(AudioManager.Instance != null)
+        {
+            Music.onValueChanged.AddListener((value) => AudioManager.Instance.MuteMusic(value));
+            SFX.onValueChanged.AddListener((value) => AudioManager.Instance.MuteSFX(value));
+        }
         Draw1.onValueChanged.AddListener((value) => OnToggleDrawOne(value));
         Draw3.onValueChanged.AddListener((value) => OnToggleDrawThree(value));
         if (PlayerPrefs.HasKey("Music"))

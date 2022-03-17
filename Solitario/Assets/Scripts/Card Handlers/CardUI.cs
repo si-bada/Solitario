@@ -5,7 +5,7 @@ using UnityEngine.UI;
 using TMPro;
 using UnityEngine.EventSystems;
 
-public class CardUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler, IPointerEnterHandler, IPointerExitHandler, IPointerDownHandler
+public class CardUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler, IPointerEnterHandler, IPointerExitHandler, IPointerDownHandler, IPointerUpHandler
 {
     #region Getters
     public CardData CurrentCardData
@@ -77,6 +77,8 @@ public class CardUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHa
     private float clicked = 0;
     private float clicktime = 0;
     private float clickdelay = 0.5f;
+    private bool canDrag = true;
+    private bool handleDrag = false;
     #endregion
 
     #region Unity Methods
@@ -99,7 +101,10 @@ public class CardUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHa
 
     private void Update()
     {
-        HandleDrag();
+        if(handleDrag)
+        {
+            HandleDrag();
+        }
     }
     #endregion
 
@@ -220,7 +225,7 @@ public class CardUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHa
     #region Unity Events
     public void OnDrag(PointerEventData eventData)
     {
-        if (GameManager.Instance.GameState == GameState.Pause || GameManager.Instance.GameState == GameState.Home)
+        if (GameManager.Instance.GameState == GameState.Pause || GameManager.Instance.GameState == GameState.Home || !canDrag)
             return;
         if (currentSide == CardSide.Back)
             return;
@@ -231,7 +236,10 @@ public class CardUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHa
 
     public void OnBeginDrag(PointerEventData eventData)
     {
-        if (GameManager.Instance.GameState == GameState.Pause || GameManager.Instance.GameState == GameState.Home)
+        handleDrag = true;
+        dragStartPos = transform.position;
+
+        if (GameManager.Instance.GameState == GameState.Pause || GameManager.Instance.GameState == GameState.Home || !canDrag)
             return;
         if (currentSide == CardSide.Back)
             return;
@@ -241,7 +249,6 @@ public class CardUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHa
         // disable the raycast block to prevent the cursor to detect this card when trying to drop it on a different card
         canvasGroup.blocksRaycasts = false;
 
-        dragStartPos = transform.position;
 
         //set canvas settings
         beginDragOverrideSorting = canvas.overrideSorting;
@@ -254,12 +261,13 @@ public class CardUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHa
 
     public void OnEndDrag(PointerEventData eventData)
     {
-        if (GameManager.Instance.GameState == GameState.Pause || GameManager.Instance.GameState == GameState.Home)
+        if (GameManager.Instance.GameState == GameState.Pause || GameManager.Instance.GameState == GameState.Home || !canDrag)
             return;
         if (currentSide == CardSide.Back)
             return;
 
         EventsManager.Instance.OnCardDropped.Invoke();
+        handleDrag = false;
     }
 
     public void OnPointerEnter(PointerEventData eventData)
@@ -370,6 +378,7 @@ public class CardUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHa
     }
     private void HandleEventCardsDealed(List<CardData> cardsData)
     {
+
         EnableRaycast(true);
 
         if (!transform.parent.name.Contains("spawnPos"))
@@ -433,6 +442,7 @@ public class CardUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHa
         {
             clicked = 0;
             clicktime = 0;
+            canDrag = false;
             EventsManager.Instance.OnCardDoubleClick.Invoke(this);
         }
         else if (clicked > 2 || Time.time - clicktime > 1)
@@ -440,6 +450,11 @@ public class CardUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHa
             clicked = 1;
             clicktime = Time.time;
         }
+    }
+
+    public void OnPointerUp(PointerEventData eventData)
+    {
+        canDrag = true;
     }
     #endregion
 

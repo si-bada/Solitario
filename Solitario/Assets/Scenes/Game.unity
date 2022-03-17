@@ -2037,6 +2037,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 304853319}
+  - component: {fileID: 304853320}
   m_Layer: 0
   m_Name: Main Panel Portrait
   m_TagString: Untagged
@@ -2065,6 +2066,23 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &304853320
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 304853318}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9dca28f985a69ec4f9719209914311e9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Music: {fileID: 395339580}
+  SFX: {fileID: 349641800}
+  Draw1: {fileID: 772035493}
+  Draw3: {fileID: 1273063227}
+  RemoveAds: {fileID: 1550647575}
 --- !u!1 &306117966
 GameObject:
   m_ObjectHideFlags: 0
@@ -8901,8 +8919,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: -81.78198}
-  m_SizeDelta: {x: 0, y: 300}
+  m_AnchoredPosition: {x: 160, y: -81.78198}
+  m_SizeDelta: {x: -320, y: 300}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &1383171134
 MonoBehaviour:
@@ -8921,8 +8939,8 @@ MonoBehaviour:
     m_Right: 0
     m_Top: 0
     m_Bottom: 0
-  m_ChildAlignment: 4
-  m_Spacing: -750
+  m_ChildAlignment: 3
+  m_Spacing: -450
   m_ChildForceExpandWidth: 1
   m_ChildForceExpandHeight: 1
   m_ChildControlWidth: 0
@@ -9339,6 +9357,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1480739520}
+  - component: {fileID: 1480739521}
   m_Layer: 0
   m_Name: Main Panel Landscape
   m_TagString: Untagged
@@ -9367,6 +9386,23 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1480739521
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1480739519}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9dca28f985a69ec4f9719209914311e9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Music: {fileID: 1442510544}
+  SFX: {fileID: 550836450}
+  Draw1: {fileID: 685861915}
+  Draw3: {fileID: 1497631059}
+  RemoveAds: {fileID: 1230723891}
 --- !u!1 &1482395684
 GameObject:
   m_ObjectHideFlags: 0

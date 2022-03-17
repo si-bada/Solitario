@@ -67,21 +67,22 @@ public class GameManager : MonoBehaviour
     #region Unity Methods
     private void Awake()
     {
-        if(Instance != null)
+        if (Instance == null)
         {
-            Destroy(gameObject);
+            Instance = this;
+            currentDeviceOrientation = Screen.orientation;
+            SceneManager.sceneLoaded += OnSceneLoaded;
+            DontDestroyOnLoad(Instance);
         }
-        Instance = this;
-        currentDeviceOrientation = Screen.orientation;
-
+        else
+        {
+            Destroy(this.gameObject);
+        }
     }
     private void Start()
     {
-        DontDestroyOnLoad(this);
-
         HandleUnityLog();
         InitSystems();
-
         StartCoroutine(CheckForDeviceOrientationChange(0.5f));
     }
     private void Update()
@@ -99,10 +100,6 @@ public class GameManager : MonoBehaviour
         {
             UpdateCompletedAcePileCount(OperationType.Add);
         }
-    }
-    private void OnDestroy()
-    {
-        keepChecking = false;
     }
     #endregion
 
@@ -139,6 +136,7 @@ public class GameManager : MonoBehaviour
     {
         AudioManager.Instance.Play("Click_SFX");
         SceneManager.LoadScene(Scene.Game.ToString());
+        StartCoroutine(CheckForDeviceOrientationChangeOnce(0f));
     }
     public void UpdateGameState(GameState gameState)
     {
@@ -159,7 +157,6 @@ public class GameManager : MonoBehaviour
     private IEnumerator CheckForDeviceOrientationChange(float delay)
     {
         yield return new WaitForSeconds(delay);
-
         currentDeviceOrientation = Screen.orientation;
 
         while (keepChecking)
@@ -174,9 +171,22 @@ public class GameManager : MonoBehaviour
                     HomeManager.Instance.StartUI();
                 }
             }
-
             yield return new WaitForSeconds(deviceOrientationCheckDelay);
         }
+    }
+    private IEnumerator CheckForDeviceOrientationChangeOnce(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        currentDeviceOrientation = Screen.orientation;
+
+        // Check for an Orientation Change
+        currentDeviceOrientation = Screen.orientation;
+        EventsManager.Instance.OnOrientationChanged.Invoke(currentDeviceOrientation);
+        if (HomeManager.Instance != null)
+        {
+            HomeManager.Instance.StartUI();
+        }
+        yield return new WaitForSeconds(deviceOrientationCheckDelay);
     }
     //editor logs
     private void HandleUnityLog()
@@ -189,7 +199,7 @@ public class GameManager : MonoBehaviour
     }
     private void OnSceneLoaded(UnityEngine.SceneManagement.Scene scene, LoadSceneMode loadSceneMode)
     {
-        StartCoroutine(CheckForDeviceOrientationChange(0.1f));
+        StartCoroutine(CheckForDeviceOrientationChangeOnce(0.1f));
     }
     #endregion
 }

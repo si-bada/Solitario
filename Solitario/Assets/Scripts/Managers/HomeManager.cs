@@ -44,13 +44,6 @@ public class HomeManager : MonoBehaviour
     #region Methods
     public void StartUI()
     {
-#if UNITY_EDITOR
-        Debug.LogWarning("Device Orientation Check does not work In Editor Mode - PORTRAIT MODE BY DEFAULT");
-        HomePortrait.SetActive(true);
-        HomeLandscape.SetActive(false);
-        Cards = CardsPortrait;
-        GoldSymbols = GoldSymbolsPortrait;
-#else
         if (GameManager.Instance.CurrentDeviceOrientation == ScreenOrientation.Portrait || GameManager.Instance.CurrentDeviceOrientation == ScreenOrientation.PortraitUpsideDown)
         {
             HomePortrait.SetActive(true);
@@ -65,7 +58,6 @@ public class HomeManager : MonoBehaviour
             Cards = CardsLandscape;
             GoldSymbols = GoldSymbolsLanscape;
         }
-#endif
 
         StartCoroutine(FlipCards());
     }
